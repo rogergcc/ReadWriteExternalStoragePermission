@@ -38,43 +38,6 @@ class PermissionsFragment : Fragment() {
     }
 
 
-//    private val cameraPermissionRequester = PermissionRequester(
-//        requireContext(),
-//        Manifest.permission.CAMERA
-//    ) { isGranted ->
-//        if (isGranted) {
-//            binding.tvResultPermissions.text = binding.tvResultPermissions.text.toString() + "Camera permission granted"
-//            toast("Camera permission granted")
-//        } else {
-//            binding.tvResultPermissions.text = binding.tvResultPermissions.text.toString() + "Camera permission denied"
-//            toast("Camera permission denied")
-//        }
-//    }
-//
-//    private val writeStoragePermissionRequester = PermissionRequester(
-//        requireContext(),
-//        Manifest.permission.WRITE_EXTERNAL_STORAGE
-//    ) { isGranted ->
-//        if (isGranted) {
-//            toast("Storage permission granted")
-//            binding.tvResultPermissions.text = binding.tvResultPermissions.text.toString() + "Storage permission granted"
-//        } else {
-//            toast("Storage permission denied")
-//            binding.tvResultPermissions.text = binding.tvResultPermissions.text.toString() + "Storage permission denied"
-//        }
-//    }
-//    private val readStoragePermissionRequester = PermissionRequester(
-//        requireContext(),
-//        Manifest.permission.READ_EXTERNAL_STORAGE
-//    ) { isGranted ->
-//        if (isGranted) {
-//            toast("Read storage permission granted")
-//            binding.tvResultPermissions.text = binding.tvResultPermissions.text.toString() + "Read storage permission granted"
-//        } else {
-//            toast("Read storage permission denied")
-//            binding.tvResultPermissions.text = binding.tvResultPermissions.text.toString() + "Read storage permission denied"
-//        }
-//    }
 
     private val cameraPermissionRequester by lazy {
         PermissionRequester(
@@ -89,32 +52,7 @@ class PermissionsFragment : Fragment() {
             binding.tvResultPermissions.append(text)
         }
     }
-    private val writeStoragePermissionRequester by lazy {
-        PermissionRequester(
-            requireContext(),
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) { isGranted ->
-            val text = if (isGranted) {
-                coloredText("Write Storage permission granted\n", android.R.color.holo_green_dark)
-            } else {
-                coloredText("Write Storage permission denied\n", android.R.color.holo_red_dark)
-            }
-            binding.tvResultPermissions.append(text)
-        }
-    }
-    private val readStoragePermissionRequester by lazy {
-        PermissionRequester(
-            requireContext(),
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        ) { isGranted ->
-            val text = if (isGranted) {
-                coloredText("Read storage permission granted\n", android.R.color.holo_green_dark)
-            } else {
-                coloredText("Read storage permission denied\n", android.R.color.holo_red_dark)
-            }
-            binding.tvResultPermissions.append(text)
-        }
-    }
+
 
     private val storagePermissionManager by lazy { StoragePermissionManager(this) }
 
@@ -144,7 +82,6 @@ class PermissionsFragment : Fragment() {
         cameraPermissionRequester.registerRequestPermissionLauncher(requireActivity().activityResultRegistry)
 //        writeStoragePermissionRequester.registerRequestPermissionLauncher(requireActivity().activityResultRegistry)
 //        readStoragePermissionRequester.registerRequestPermissionLauncher(requireActivity().activityResultRegistry)
-//        manageExternalStorageRequester.registerRequestPermissionLauncher(requireActivity().activityResultRegistry)
 
         storagePermissionManager.onPermissionResult = { isGranted ->
             val text = if (isGranted) {
@@ -211,55 +148,6 @@ class PermissionsFragment : Fragment() {
                 android.R.color.holo_green_dark
             )
         )
-    }
-
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun requestPermissionStorageManager() {
-        //android is 11 or above
-        try {
-            val intent = Intent()
-            intent.action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
-            val uri = Uri.fromParts("package", requireContext().packageName, null)
-            intent.data = uri
-            storageActivityResultLauncher.launch(intent)
-        } catch (e: Exception) {
-            Log.e("TAG", "RequestPermission")
-            val intent = Intent()
-            intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-            storageActivityResultLauncher.launch(intent)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun checkPermissionStorageManager(): Boolean {
-        try {
-            val isPermissionStorageManager = Environment.isExternalStorageManager()
-            if (!isPermissionStorageManager) {
-                coloredText(
-                    "Manage external storage permission denied\n",
-                    android.R.color.holo_red_dark
-                )
-            } else {
-                coloredText(
-                    "Manage external storage permission granted\n",
-                    android.R.color.holo_green_dark
-                )
-            }
-            Log.e(
-                TAG,
-                "checkPermissionStorageManager() isPermissionStorageManager: $isPermissionStorageManager"
-            )
-            return isPermissionStorageManager
-        } catch (e: Exception) {
-            Log.e(TAG, "checkPermissionStorageManager() error: ${e.message}")
-            coloredText(
-                "Manage external storage permission denied\n",
-                android.R.color.holo_red_dark
-            )
-            return false
-        }
-
     }
 
 
