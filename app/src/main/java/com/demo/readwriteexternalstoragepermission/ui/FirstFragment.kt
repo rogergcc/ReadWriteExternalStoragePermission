@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.demo.readwriteexternalstoragepermission.databinding.FragmentFirstBinding
+import com.demo.readwriteexternalstoragepermission.ui.utils.FileStorageManager
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -30,7 +31,7 @@ class FirstFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-
+    private val fileStorageManager by lazy { FileStorageManager(requireContext()) }
     companion object {
         private const val TAG: String = "FirstFragment"
         const val IMAGE_DIRECTORY = "/abc_test"
@@ -62,6 +63,21 @@ class FirstFragment : Fragment() {
             takePicture.launch(null)
 //            takePhotoFromCamera()
         }
+        binding.btnSaveSampleXML.setOnClickListener{
+            val fileName = "xml_"+getCalendarInstanceName()
+            Log.d(TAG, "saveXml: init")
+            val xmlContent = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <note>
+                <to>Tove</to>
+                <from>Jani</from>
+                <heading>Reminder</heading>
+                <body>Don't forget me this weekend!</body>
+            </note>
+        """.trimIndent()
+
+            fileStorageManager.saveXmlToExternalStorageSDCard("$fileName.xml", xmlContent)
+        }
     }
 
     //    private fun takePhotoFromCamera() {
@@ -72,6 +88,7 @@ class FirstFragment : Fragment() {
 //
 //        }
 //    }
+
     private fun createFolder(folderNameM: String): Boolean {
         try {
             val file =
@@ -122,98 +139,9 @@ class FirstFragment : Fragment() {
 
         }
 
-    private fun saveImage(bitmap: Bitmap) {
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "Image_${System.currentTimeMillis()}.jpg")
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
-                put(MediaStore.MediaColumns.IS_PENDING, 1)
-            }
-        }
 
-        val uri = requireContext().contentResolver.insert(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            contentValues
-        )
 
-        uri?.let {
-            val outputStream: OutputStream? = requireContext().contentResolver.openOutputStream(it)
-            outputStream?.let { os ->
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os)
-                os.close()
-            }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                contentValues.clear()
-                contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
-                requireContext().contentResolver.update(uri, contentValues, null, null)
-            }
-        }
-    }
-
-    private fun createFileDestination1(
-        myBitmap: Bitmap,
-        folderDirectory: File,
-        fileName: String,
-    ): File? {
-        try {
-            if (!folderDirectory.exists()) {
-                throw Exception("createFileDestination1() Folder not exists")
-            }
-
-            val fileDestination1 = File(folderDirectory, fileName)
-            if (!fileDestination1.exists()) {
-                val fileCreated = fileDestination1.createNewFile()
-                if (!fileCreated) {
-                    // Failed to create the file
-                    throw Exception("createFileDestination1() File not exists")
-                }
-            }
-            val fo = FileOutputStream(fileDestination1)
-            myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, fo)
-            fo.close()
-            return fileDestination1
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Error al crear fileDestination1: ${e.message}")
-        }
-
-        return null
-    }
-
-    private fun createFileDestination2(myBitmap: Bitmap, fileName: String): File? {
-        try {
-            val fileDestination2 =
-                File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName)
-
-            if (!fileDestination2.exists()) {
-                val fileCreated = fileDestination2.createNewFile()
-                if (!fileCreated) {
-                    // Failed to create the file
-                  throw Exception("Failed to create the file")
-                }
-            }else{
-                Log.d(TAG, "createFileDestination2: file2 exists")
-            }
-
-            val fo = FileOutputStream(fileDestination2)
-            fo.write(ByteArrayOutputStream().apply {
-                myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, this)
-            }.toByteArray())
-            MediaScannerConnection.scanFile(
-                requireContext(),
-                arrayOf(fileDestination2.path),
-                arrayOf("image/jpeg"),
-                null
-            )
-            fo.close()
-            return fileDestination2
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fileDestination2(): ${e.message}")
-        }
-        return null
-    }
 
     private fun saveImageBitmap(myBitmap: Bitmap): String {
 
@@ -231,10 +159,15 @@ class FirstFragment : Fragment() {
 
             val fileName = "image_"+getCalendarInstanceName()
 
-            val fileDestination1 = createFileDestination1(myBitmap, folderDirectory, fileName)
+            val fileDestination1 = fileStorageManager.saveImageBitmapToSdCard(
+                myBitmap, folderDirectory, "$fileName.jpg"
+            )
 
             val fileName2 = "img_"+getCalendarInstanceName()
-            val fileDestination2 = createFileDestination2(myBitmap, fileName2)
+            val fileDestination2 = fileStorageManager.saveImageBitmapToSdCardPrivate(
+                myBitmap,
+                "$fileName2.jpg"
+            )
             /*
             *
             *  use fileDestination1 ->
@@ -282,7 +215,7 @@ class FirstFragment : Fragment() {
     }
 
     private fun getCalendarInstanceName() =
-        Calendar.getInstance().timeInMillis.toString().replace(":", ".") + ".jpg"
+        Calendar.getInstance().timeInMillis.toString().replace(":", ".")
 
     private fun toast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
