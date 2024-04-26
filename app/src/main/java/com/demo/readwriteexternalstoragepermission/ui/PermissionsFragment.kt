@@ -23,6 +23,7 @@ import com.demo.readwriteexternalstoragepermission.R
 import com.demo.readwriteexternalstoragepermission.databinding.FragmentPermissionsBinding
 import com.demo.readwriteexternalstoragepermission.ui.permissions.StoragePermissionManager
 import com.demo.readwriteexternalstoragepermission.ui.utils.PermissionRequester
+import com.demo.readwriteexternalstoragepermission.ui.utils.TextUtils
 
 class PermissionsFragment : Fragment() {
 
@@ -45,9 +46,9 @@ class PermissionsFragment : Fragment() {
             Manifest.permission.CAMERA
         ) { isGranted ->
             val text = if (isGranted) {
-                coloredText("Camera permission granted\n", android.R.color.holo_green_dark)
+                TextUtils.coloredText(requireContext(), "Camera permission granted\n", android.R.color.holo_green_dark)
             } else {
-                coloredText("Camera permission denied\n", android.R.color.holo_red_dark)
+                TextUtils.coloredText(requireContext(), "Camera permission denied\n", android.R.color.holo_red_dark)
             }
             binding.tvResultPermissions.append(text)
         }
@@ -69,13 +70,13 @@ class PermissionsFragment : Fragment() {
     }
 
     private companion object {
-        private const val TAG = "PERMISSION_TAG"
+        private const val TAG = "PermissionsFragment"
     }
     override fun onResume() {
         super.onResume()
-//        if (!storagePermissionManager.hasPermission()) {
-//            storagePermissionManager.requestStoragePermission()
-//        }
+        if (!storagePermissionManager.hasPermission()) {
+            storagePermissionManager.requestStoragePermission()
+        }
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -85,9 +86,9 @@ class PermissionsFragment : Fragment() {
 
         storagePermissionManager.onPermissionResult = { isGranted ->
             val text = if (isGranted) {
-                coloredText("Storage permission granted\n", android.R.color.holo_green_dark)
+                TextUtils.coloredText(requireContext(), "Storage permission granted\n", android.R.color.holo_green_dark)
             } else {
-                coloredText("Storage permission denied\n", android.R.color.holo_red_dark)
+                TextUtils.coloredText(requireContext(), "Storage permission denied\n", android.R.color.holo_red_dark)
             }
             binding.tvResultPermissions.append(text)
         }
@@ -112,25 +113,25 @@ class PermissionsFragment : Fragment() {
 
     }
 
-    private val storageActivityResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if (Environment.isExternalStorageManager()) {
-                    coloredText(
-                        "Manage external storage permission granted\n",
-                        android.R.color.holo_green_dark
-                    )
-                } else {
-                    //manage external storage is denied
-                    coloredText(
-                        "Manage external storage permission denied\n",
-                        android.R.color.holo_red_dark
-                    )
-                }
-            } else {
-                //android is below 11
-            }
-        }
+//    private val storageActivityResultLauncher =
+//        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//                if (Environment.isExternalStorageManager()) {
+//                    coloredText(
+//                        "Manage external storage permission granted\n",
+//                        android.R.color.holo_green_dark
+//                    )
+//                } else {
+//                    //manage external storage is denied
+//                    coloredText(
+//                        "Manage external storage permission denied\n",
+//                        android.R.color.holo_red_dark
+//                    )
+//                }
+//            } else {
+//                //android is below 11
+//            }
+//        }
 
     private fun colorPermissionDenied() {
         binding.tvResultPermissions.setTextColor(
