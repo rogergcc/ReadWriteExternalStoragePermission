@@ -15,7 +15,10 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.demo.readwriteexternalstoragepermission.databinding.FragmentFirstBinding
-import java.io.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.util.*
 
 
@@ -27,6 +30,11 @@ class FirstFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    companion object {
+        private const val TAG: String = "FirstFragment"
+        const val IMAGE_DIRECTORY = "/abc_test"
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,7 +74,8 @@ class FirstFragment : Fragment() {
 //    }
     private fun createFolder(folderNameM: String): Boolean {
         try {
-            val file = File(Environment.getExternalStorageDirectory().toString() + "/" + folderNameM)
+            val file =
+                File(Environment.getExternalStorageDirectory().toString() + "/" + folderNameM)
             if (file.exists()) {
                 binding.tvResult.text = "Folder already exists"
                 toast("Folder already exists")
@@ -95,16 +104,22 @@ class FirstFragment : Fragment() {
 
     private val takePicture =
         registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            if (bitmap == null) {
-                // La captura de la imagen falló o el usuario canceló la operación
-                toast("La captura de la imagen falló o el usuario canceló la operación")
-                return@registerForActivityResult
+            try {
+                if (bitmap == null) {
+                    // La captura de la imagen falló o el usuario canceló la operación
+                    toast("La captura de la imagen falló o el usuario canceló la operación")
+                    Log.i(TAG, "La captura de la imagen falló o el usuario canceló la operación")
+                    return@registerForActivityResult
+                }
+                // La imagen se capturó con éxito
+                // Aquí puedes guardar la imagen o hacer algo con ella
+                binding.imvPhoto.setImageBitmap(bitmap)
+                saveImageBitmap(bitmap)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error: takePicture ${e.message}")
+                toast("Error: takePicture ${e.message}")
             }
 
-            // La imagen se capturó con éxito
-            // Aquí puedes guardar la imagen o hacer algo con ella
-            binding.imvPhoto.setImageBitmap(bitmap)
-            saveImageBitmap(bitmap)
         }
 
     private fun saveImage(bitmap: Bitmap) {
@@ -137,32 +152,89 @@ class FirstFragment : Fragment() {
         }
     }
 
+    private fun createFileDestination1(
+        myBitmap: Bitmap,
+        folderDirectory: File,
+        fileName: String,
+    ): File? {
+        try {
+            if (!folderDirectory.exists()) {
+                throw Exception("createFileDestination1() Folder not exists")
+            }
+
+            val fileDestination1 = File(folderDirectory, fileName)
+            if (!fileDestination1.exists()) {
+                val fileCreated = fileDestination1.createNewFile()
+                if (!fileCreated) {
+                    // Failed to create the file
+                    throw Exception("createFileDestination1() File not exists")
+                }
+            }
+            val fo = FileOutputStream(fileDestination1)
+            myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, fo)
+            fo.close()
+            return fileDestination1
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error al crear fileDestination1: ${e.message}")
+        }
+
+        return null
+    }
+
+    private fun createFileDestination2(myBitmap: Bitmap, fileName: String): File? {
+        try {
+            val fileDestination2 =
+                File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName)
+
+            if (!fileDestination2.exists()) {
+                val fileCreated = fileDestination2.createNewFile()
+                if (!fileCreated) {
+                    // Failed to create the file
+                  throw Exception("Failed to create the file")
+                }
+            }else{
+                Log.d(TAG, "createFileDestination2: file2 exists")
+            }
+
+            val fo = FileOutputStream(fileDestination2)
+            fo.write(ByteArrayOutputStream().apply {
+                myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, this)
+            }.toByteArray())
+            MediaScannerConnection.scanFile(
+                requireContext(),
+                arrayOf(fileDestination2.path),
+                arrayOf("image/jpeg"),
+                null
+            )
+            fo.close()
+            return fileDestination2
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fileDestination2(): ${e.message}")
+        }
+        return null
+    }
+
     private fun saveImageBitmap(myBitmap: Bitmap): String {
 
         try {
-            val bytes = ByteArrayOutputStream()
-            myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes)
-
-            val wallpaperDirectory = File(Environment.getExternalStorageDirectory().toString() + IMAGE_DIRECTORY
-            )
-
-            val fileName = Calendar.getInstance().timeInMillis.toString().replace(":", ".") +
-                        ".jpg"
-
-            if (!wallpaperDirectory.exists()) {
-                wallpaperDirectory.mkdirs()
+            val folderDirectory = File(Environment.getExternalStorageDirectory().toString() + IMAGE_DIRECTORY)
+            if (!folderDirectory.exists()) {
+                val wasDirectoryCreated = folderDirectory.mkdirs()
+                if (!wasDirectoryCreated) {
+                    Log.d(TAG, "El directorio no fue creado.")
+                }else{
+                    Log.d(TAG, "El directorio fue creado.")
+                }
             }
 
-            val fileDestination1 = File(wallpaperDirectory, Calendar.getInstance().timeInMillis.toString().replace(":", ".") +
-                    ".jpg")
 
-            val fileDestination2: File = File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName)
+            val fileName = "image_"+getCalendarInstanceName()
 
-            Log.d(TAG, "saveImage: file1 : $fileDestination1")
-            binding.tvFile1.text = "file1 : ${fileDestination1.absolutePath}"
-            Log.d(TAG, "saveImage: file2 : $fileDestination2")
-            binding.tvFile2.text = "file2 : ${fileDestination2.absolutePath}"
+            val fileDestination1 = createFileDestination1(myBitmap, folderDirectory, fileName)
 
+            val fileName2 = "img_"+getCalendarInstanceName()
+            val fileDestination2 = createFileDestination2(myBitmap, fileName2)
             /*
             *
             *  use fileDestination1 ->
@@ -175,32 +247,42 @@ class FirstFragment : Fragment() {
             *  works fine
             *
             * */
-            fileDestination2.createNewFile()
-            val fo = FileOutputStream(fileDestination2)
-            fo.write(bytes.toByteArray())
-            MediaScannerConnection.scanFile(
-                requireContext(),
-                arrayOf(fileDestination2.path),
-                arrayOf("image/jpeg"),
-                null
-            )
-            fo.close()
-            Log.d(
-                TAG, "File Saved --->"
-                        + fileDestination2.absolutePath
-            )
-            return fileDestination2.absolutePath
 
-        } catch (e1: IOException) {
+//            fileDestination1.createNewFile()
+
+            if (fileDestination1 == null || !fileDestination1.exists() ) {
+                binding.tvFile1.text = "file1 No creado : ${fileDestination1?.absolutePath}"
+            } else {
+                    binding.tvFile1.text = "file1 Creado : ${fileDestination1}"
+            }
+
+
+            if (fileDestination2 != null) {
+                if (fileDestination2.exists()) {
+                    Log.d(TAG, "saveImage: file2 : $fileDestination2")
+                    binding.tvFile2.text = "file2 Creado : ${fileDestination2}"
+                } else {
+                    binding.tvFile2.text = "file2 No creado : ${fileDestination2.absolutePath}"
+                    Log.e(TAG, "file2 No creado : ${fileDestination2.absolutePath}")
+                }
+            } else {
+                binding.tvFile2.text = "file2 No creado : ${fileDestination2?.absolutePath}"
+            }
+
+
+            return ""
+
+        } catch (e1: Exception) {
             e1.printStackTrace()
-            Log.d(TAG, "failed ${e1.message}")
+            Log.d(TAG, "failed saveImageBitmap ${e1.message}")
             toast("failed ${e1.message}")
         }
 
-
-
         return ""
     }
+
+    private fun getCalendarInstanceName() =
+        Calendar.getInstance().timeInMillis.toString().replace(":", ".") + ".jpg"
 
     private fun toast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
@@ -212,8 +294,5 @@ class FirstFragment : Fragment() {
         _binding = null
     }
 
-    companion object {
-        private const val TAG: String = "FirstFragment"
-        const val IMAGE_DIRECTORY = "/abc_test"
-    }
+
 }

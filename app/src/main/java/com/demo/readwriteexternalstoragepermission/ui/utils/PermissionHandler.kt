@@ -36,7 +36,7 @@ class PermissionHandler(
         }
     }
 
-    fun hasPermission(permission: String): Boolean {
+    fun hasPermissionManageExternalStorage(permission: String): Boolean {
         return if (permission == Manifest.permission.MANAGE_EXTERNAL_STORAGE) {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.R || Environment.isExternalStorageManager()
         } else {
@@ -44,7 +44,7 @@ class PermissionHandler(
         }
     }
 
-    fun requestPermission(permission: String) {
+    fun requestPermissionManagerExternalStorage(permission: String) {
         if (permission == Manifest.permission.MANAGE_EXTERNAL_STORAGE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
             val uri = Uri.fromParts("package", context.packageName, null)
