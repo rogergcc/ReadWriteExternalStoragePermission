@@ -6,32 +6,32 @@
     app:startDestination="@id/permissionsFragment">
 
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="com.demo.readwriteexternalstoragepermission.ui.FirstFragment"
+        android:id="@+id/FileManagementFragment"
+        android:name="com.demo.readwriteexternalstoragepermission.ui.filemanager.FileManagementFragment"
         android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        tools:layout="@layout/fragment_file_management">
 
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
+            android:id="@+id/action_FileManagementFragment_to_SecondFragment"
             app:destination="@id/SecondFragment" />
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
-        android:name="com.demo.readwriteexternalstoragepermission.SecondFragment"
+        android:name="com.demo.readwriteexternalstoragepermission.ui.SecondFragment"
         android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_second">
 
         <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
+            android:id="@+id/action_SecondFragment_to_FileManagementFragment"
+            app:destination="@id/FileManagementFragment" />
     </fragment>
     <fragment
         android:id="@+id/permissionsFragment"
-        android:name="com.demo.readwriteexternalstoragepermission.ui.PermissionsFragment"
+        android:name="com.demo.readwriteexternalstoragepermission.ui.permissions.PermissionsFragment"
         android:label="fragment_permissions"
         tools:layout="@layout/fragment_permissions" >
         <action
-            android:id="@+id/action_permissionsFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
+            android:id="@+id/action_permissionsFragment_to_FileManagementFragment"
+            app:destination="@id/FileManagementFragment" />
     </fragment>
 </navigation>

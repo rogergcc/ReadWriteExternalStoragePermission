@@ -1,12 +1,7 @@
-package com.demo.readwriteexternalstoragepermission.ui
+package com.demo.readwriteexternalstoragepermission.ui.filemanager
 
-import android.content.ContentValues
 import android.graphics.Bitmap
-import android.media.MediaScannerConnection
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,27 +9,23 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import com.demo.readwriteexternalstoragepermission.databinding.FragmentFirstBinding
+import com.demo.readwriteexternalstoragepermission.databinding.FragmentFileManagementBinding
 import com.demo.readwriteexternalstoragepermission.ui.utils.FileStorageManager
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
-import java.util.*
+import com.demo.readwriteexternalstoragepermission.ui.utils.AppUtils
 
 
-class FirstFragment : Fragment() {
+class FileManagementFragment : Fragment() {
 
     private lateinit var folderName: String
-    private var _binding: FragmentFirstBinding? = null
+    private var _binding: FragmentFileManagementBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
     private val fileStorageManager by lazy { FileStorageManager(requireContext()) }
+
     companion object {
-        private const val TAG: String = "FirstFragment"
-        const val IMAGE_DIRECTORY = "/abc_test"
+        private const val TAG: String = "FileManagementFragment"
     }
 
     override fun onCreateView(
@@ -42,7 +33,7 @@ class FirstFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
 
-        _binding = FragmentFirstBinding.inflate(inflater, container, false)
+        _binding = FragmentFileManagementBinding.inflate(inflater, container, false)
         return binding.root
 
     }
@@ -51,7 +42,7 @@ class FirstFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 //        binding.buttonFirst.setOnClickListener {
-//            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+//            findNavController().navigate(R.id.action_FileManagementFragment_to_SecondFragment)
 //        }
 
         binding.btnCreateFolder.setOnClickListener {
@@ -63,8 +54,8 @@ class FirstFragment : Fragment() {
             takePicture.launch(null)
 //            takePhotoFromCamera()
         }
-        binding.btnSaveSampleXML.setOnClickListener{
-            val fileName = "xml_"+getCalendarInstanceName()
+        binding.btnSaveSampleXML.setOnClickListener {
+            val fileName = "xml_" + AppUtils.getCalendarInstanceName()
             Log.d(TAG, "saveXml: init")
             val xmlContent = """
             <?xml version="1.0" encoding="UTF-8"?>
@@ -91,8 +82,7 @@ class FirstFragment : Fragment() {
 
     private fun createFolder(folderNameM: String): Boolean {
         try {
-            val file =
-                File(Environment.getExternalStorageDirectory().toString() + "/" + folderNameM)
+            val file = fileStorageManager.folderNamePath(folderNameM)
             if (file.exists()) {
                 binding.tvResult.text = "Folder already exists"
                 toast("Folder already exists")
@@ -131,7 +121,9 @@ class FirstFragment : Fragment() {
                 // La imagen se capturó con éxito
                 // Aquí puedes guardar la imagen o hacer algo con ella
                 binding.imvPhoto.setImageBitmap(bitmap)
-                saveImageBitmap(bitmap)
+
+
+                saveImageBitmaptoDirectoriesExternal(bitmap)
             } catch (e: Exception) {
                 Log.e(TAG, "Error: takePicture ${e.message}")
                 toast("Error: takePicture ${e.message}")
@@ -140,30 +132,18 @@ class FirstFragment : Fragment() {
         }
 
 
-
-
-
-    private fun saveImageBitmap(myBitmap: Bitmap): String {
+    private fun saveImageBitmaptoDirectoriesExternal(myBitmap: Bitmap): String {
 
         try {
-            val folderDirectory = File(Environment.getExternalStorageDirectory().toString() + IMAGE_DIRECTORY)
-            if (!folderDirectory.exists()) {
-                val wasDirectoryCreated = folderDirectory.mkdirs()
-                if (!wasDirectoryCreated) {
-                    Log.d(TAG, "El directorio no fue creado.")
-                }else{
-                    Log.d(TAG, "El directorio fue creado.")
-                }
-            }
 
 
-            val fileName = "image_"+getCalendarInstanceName()
+            val fileName = "image_" + AppUtils.getCalendarInstanceName()
 
             val fileDestination1 = fileStorageManager.saveImageBitmapToSdCard(
-                myBitmap, folderDirectory, "$fileName.jpg"
+                myBitmap, "$fileName.jpg"
             )
 
-            val fileName2 = "img_"+getCalendarInstanceName()
+            val fileName2 = "img_" + AppUtils.getCalendarInstanceName()
             val fileDestination2 = fileStorageManager.saveImageBitmapToSdCardPrivate(
                 myBitmap,
                 "$fileName2.jpg"
@@ -183,10 +163,10 @@ class FirstFragment : Fragment() {
 
 //            fileDestination1.createNewFile()
 
-            if (fileDestination1 == null || !fileDestination1.exists() ) {
+            if (fileDestination1 == null || !fileDestination1.exists()) {
                 binding.tvFile1.text = "file1 No creado : ${fileDestination1?.absolutePath}"
             } else {
-                    binding.tvFile1.text = "file1 Creado : ${fileDestination1}"
+                binding.tvFile1.text = "file1 Creado : ${fileDestination1}"
             }
 
 
@@ -213,9 +193,6 @@ class FirstFragment : Fragment() {
 
         return ""
     }
-
-    private fun getCalendarInstanceName() =
-        Calendar.getInstance().timeInMillis.toString().replace(":", ".")
 
     private fun toast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()

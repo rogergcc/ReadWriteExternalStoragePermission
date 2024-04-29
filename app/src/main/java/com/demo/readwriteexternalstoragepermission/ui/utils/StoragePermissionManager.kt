@@ -1,4 +1,4 @@
-package com.demo.readwriteexternalstoragepermission.ui.permissions
+package com.demo.readwriteexternalstoragepermission.ui.utils
 
 
 /**

@@ -1,14 +1,12 @@
-package com.demo.readwriteexternalstoragepermission
+package com.demo.readwriteexternalstoragepermission.ui
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
-import android.view.MenuItem
+import com.demo.readwriteexternalstoragepermission.R
 import com.demo.readwriteexternalstoragepermission.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {

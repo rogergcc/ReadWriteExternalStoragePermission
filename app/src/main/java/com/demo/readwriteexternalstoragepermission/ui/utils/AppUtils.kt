@@ -5,13 +5,14 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import androidx.core.content.ContextCompat
+import java.util.*
 
 
 /**
  * Created on abril.
  * year 2024 .
  */
-object TextUtils {
+object AppUtils {
     fun coloredText(context: Context, text: String, colorId: Int): SpannableStringBuilder {
         val spannable = SpannableStringBuilder(text)
         val color: Int = ContextCompat.getColor(context, colorId)
@@ -23,4 +24,6 @@ object TextUtils {
         )
         return spannable
     }
+    fun getCalendarInstanceName() =
+        Calendar.getInstance().timeInMillis.toString().replace(":", ".")
 }
