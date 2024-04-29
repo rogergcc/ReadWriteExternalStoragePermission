@@ -8,6 +8,7 @@ package com.demo.readwriteexternalstoragepermission.ui.utils
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaScannerConnection
 import android.os.Build
 import android.os.Environment
@@ -41,8 +42,14 @@ class FileStorageManager(private val context: Context) {
         return directory
     }
 
+    private fun getImageDirectory() = IMAGE_DIRECTORY
+    fun folderNamePath(imageDirectory: String) =
+        File(Environment.getExternalStorageDirectory().toString() + imageDirectory)
+
+
     fun saveXmlToExternalStorageDocumentFolder(filename: String, xmlContent: String) {
         try {
+            //save in documents folder
             val folderDirectory = folderNamePath(getImageDirectory())
             if (!folderDirectory.exists()) {
                 val wasDirectoryCreated = folderDirectory.mkdirs()
@@ -84,8 +91,10 @@ class FileStorageManager(private val context: Context) {
         }
     }
 
+    //region SAVEING IN SDCARD EXTERNAL
 
-    fun saveXmlToExternalStorageSDCard(filename: String, xmlContent: String) {
+    fun saveXmlFileToSdCard(filename: String, xmlContent: String) {
+        // sdcard/abc_test
         try {
 
             val folderDirectory = folderNamePath(getImageDirectory())
@@ -113,17 +122,11 @@ class FileStorageManager(private val context: Context) {
         } catch (e: Exception) {
             Log.e("FileStorageManager", "Error al crear fileDestination: ${e.message}")
         }
-        finally {
 
-        }
     }
 
-    private fun getImageDirectory() = IMAGE_DIRECTORY
-    fun folderNamePath(imageDirectory: String) =
-        File(Environment.getExternalStorageDirectory().toString() + imageDirectory)
-
-
-    fun saveImageBitmapToSdCard(myBitmap: Bitmap, fileName: String, ): File? {
+    fun saveImageBitmapToSdCard(myBitmap: Bitmap, fileName: String): File? {
+        // sdcard/abc_test
         try {
 
             val folderDirectory = folderNamePath(getImageDirectory())
@@ -157,6 +160,8 @@ class FileStorageManager(private val context: Context) {
         return null
     }
 
+    //endregion
+
     fun saveImageBitmapToSdCardPrivate(myBitmap: Bitmap, fileName: String): File? {
         ///sdcard/Android/data/com.demo.readwriteexternalstoragepermission/files/Pictures/img_1714161561721.jpg
         try {
@@ -170,7 +175,7 @@ class FileStorageManager(private val context: Context) {
                     throw Exception("Failed to create the file")
                 }
             } else {
-                Log.d(TAG, "createFileDestination2: file2 exists")
+                Log.d(TAG, "saveImageBitmapToSdCardPrivate: file2 exists")
             }
 
             val fo = FileOutputStream(fileDestination2)
@@ -186,7 +191,7 @@ class FileStorageManager(private val context: Context) {
             fo.close()
             return fileDestination2
         } catch (e: Exception) {
-            Log.e(TAG, "Error fileDestination2(): ${e.message}")
+            Log.e(TAG, "Error saveImageBitmapToSdCardPrivate(): ${e.message}")
         }
         return null
     }

@@ -67,7 +67,7 @@ class FileManagementFragment : Fragment() {
             </note>
         """.trimIndent()
 
-            fileStorageManager.saveXmlToExternalStorageSDCard("$fileName.xml", xmlContent)
+            fileStorageManager.saveXmlFileToSdCard("$fileName.xml", xmlContent)
         }
     }
 
