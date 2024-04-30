@@ -53,7 +53,7 @@ class StoragePermissionManager(private val fragment: Fragment) {
     fun requestStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
-                onPermissionResult?.invoke(true)
+                onPermissionResult?.invoke(Environment.isExternalStorageManager())
             } else {
                 requestPermissionStorageManager()
             }

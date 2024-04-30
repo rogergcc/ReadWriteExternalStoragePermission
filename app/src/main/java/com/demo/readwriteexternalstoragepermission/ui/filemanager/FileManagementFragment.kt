@@ -55,7 +55,7 @@ class FileManagementFragment : Fragment() {
 //            takePhotoFromCamera()
         }
         binding.btnSaveSampleXML.setOnClickListener {
-            val fileName = "xml_" + AppUtils.getCalendarInstanceName()
+            val fileName = "xml_" + AppUtils.fileNameXmlSdPublic()
             Log.d(TAG, "saveXml: init")
             val xmlContent = """
             <?xml version="1.0" encoding="UTF-8"?>
@@ -68,6 +68,18 @@ class FileManagementFragment : Fragment() {
         """.trimIndent()
 
             fileStorageManager.saveXmlFileToSdCard("$fileName.xml", xmlContent)
+        }
+
+        binding.btnReadXml.setOnClickListener {
+            val filename = "xml_" + AppUtils.fileNameXmlSdPublic() + ".xml"
+            val xmlContent = fileStorageManager.readXmlFromExternalStorageSDCard(filename)
+            Log.d(TAG, "Contenido del archivo XML: $xmlContent")
+        }
+
+        binding.btnReadImage.setOnClickListener {
+            val filename = "image_" + AppUtils.fileNameImageSdPublic() + ".jpg"
+            val bitmap = fileStorageManager.readImageBitmapFromSdCard(filename)
+            binding.imvRead.setImageBitmap(bitmap)
         }
     }
 
@@ -109,8 +121,7 @@ class FileManagementFragment : Fragment() {
     }
 
 
-    private val takePicture =
-        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+    private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
             try {
                 if (bitmap == null) {
                     // La captura de la imagen falló o el usuario canceló la operación
@@ -137,13 +148,13 @@ class FileManagementFragment : Fragment() {
         try {
 
 
-            val fileName = "image_" + AppUtils.getCalendarInstanceName()
+            val fileName = "image_" + AppUtils.fileNameImageSdPublic()
 
             val fileDestination1 = fileStorageManager.saveImageBitmapToSdCard(
                 myBitmap, "$fileName.jpg"
             )
 
-            val fileName2 = "img_" + AppUtils.getCalendarInstanceName()
+            val fileName2 = "img_" + AppUtils.fileNameImageSdPrivate()
             val fileDestination2 = fileStorageManager.saveImageBitmapToSdCardPrivate(
                 myBitmap,
                 "$fileName2.jpg"

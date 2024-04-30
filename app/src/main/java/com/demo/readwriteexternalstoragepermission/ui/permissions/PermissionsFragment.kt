@@ -52,9 +52,9 @@ class PermissionsFragment : Fragment() {
     }
     override fun onResume() {
         super.onResume()
-        if (!storagePermissionManager.hasPermission()) {
-            storagePermissionManager.requestStoragePermission()
-        }
+//        if (!storagePermissionManager.hasPermission()) {
+//            storagePermissionManager.requestStoragePermission()
+//        }
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

@@ -162,6 +162,31 @@ class FileStorageManager(private val context: Context) {
 
     //endregion
 
+    fun readXmlFromExternalStorageSDCard(filename: String): String {
+        val folderDirectory = folderNamePath(getImageDirectory())
+        val file = File(folderDirectory, filename)
+
+        return if (file.exists()) {
+            file.readText()
+        } else {
+            Log.e(TAG, "El archivo $filename no existe.")
+            ""
+        }
+    }
+
+    fun readImageBitmapFromSdCard(filename: String): Bitmap? {
+        val folderDirectory = folderNamePath(getImageDirectory())
+        val file = File(folderDirectory, filename)
+
+        return if (file.exists()) {
+            BitmapFactory.decodeFile(file.absolutePath)
+        } else {
+            Log.e(TAG, "El archivo $filename no existe.")
+            null
+        }
+    }
+
+
     fun saveImageBitmapToSdCardPrivate(myBitmap: Bitmap, fileName: String): File? {
         ///sdcard/Android/data/com.demo.readwriteexternalstoragepermission/files/Pictures/img_1714161561721.jpg
         try {

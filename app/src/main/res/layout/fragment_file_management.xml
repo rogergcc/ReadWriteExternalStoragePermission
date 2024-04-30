@@ -97,6 +97,36 @@
                 android:id="@+id/tvResult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+
+            <View
+                android:background="@android:drawable/divider_horizontal_bright"
+                android:layout_width="match_parent"
+                android:backgroundTint="@android:color/holo_blue_bright"
+                android:layout_height="20dp"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_marginTop="@dimen/fab_margin"
+                android:id="@+id/btnReadXml"
+                android:text="Read xml"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_marginTop="@dimen/fab_margin"
+                android:id="@+id/btnReadImage"
+                android:text="Read Image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatImageView
+
+                android:background="@color/cardview_shadow_start_color"
+                android:id="@+id/imvRead"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_marginTop="10dp"
+                android:adjustViewBounds="true"
+                app:srcCompat="@drawable/ic_picture" />
         </LinearLayout>
     </ScrollView>
 

@@ -26,4 +26,7 @@ object AppUtils {
     }
     fun getCalendarInstanceName() =
         Calendar.getInstance().timeInMillis.toString().replace(":", ".")
+    fun fileNameImageSdPublic() = "ImageSdPublic"
+    fun fileNameXmlSdPublic() = "XmlSdPublic"
+    fun fileNameImageSdPrivate() = "ImageSdPrivate"
 }
