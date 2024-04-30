@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.demo.readwriteexternalstoragepermission.databinding.FragmentFileManagementBinding
+import com.demo.readwriteexternalstoragepermission.ui.encrypt.EncryptedFileStorage
 import com.demo.readwriteexternalstoragepermission.ui.utils.FileStorageManager
 import com.demo.readwriteexternalstoragepermission.ui.utils.AppUtils
 import com.demo.readwriteexternalstoragepermission.ui.utils.highlight
@@ -71,11 +72,17 @@ class FileManagementFragment : Fragment() {
         """.trimIndent()
 
             fileStorageManager.saveXmlFileToSdCard("$fileName.xml", xmlContent)
+
         }
 
         binding.btnReadXml.setOnClickListener {
             val filename = "xml_" + AppUtils.fileNameXmlSdPublic() + ".xml"
-            val xmlContent = fileStorageManager.readXmlFromExternalStorageSDCard(filename).highlight()
+
+            //todo version anterior leer
+            val xmlContent = fileStorageManager.readXmlFromExternalStorageSDCard(filename)?.highlight()
+
+
+
             Log.d(TAG, "Contenido del archivo XML: $xmlContent")
 
             binding.fileText.text = xmlContent

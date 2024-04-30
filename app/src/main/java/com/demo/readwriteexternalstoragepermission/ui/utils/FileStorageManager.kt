@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import com.demo.readwriteexternalstoragepermission.ui.encrypt.EncryptedFileStorage
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -116,9 +117,20 @@ class FileStorageManager(private val context: Context) {
                 }
             }
 
-            val fos = FileOutputStream(fileDestination)
-            fos.write(xmlContent.toByteArray())
-            fos.close()
+            //TODO create file normal
+//            val fos = FileOutputStream(fileDestination)
+//            fos.write(xmlContent.toByteArray())
+//            fos.close()
+
+            //TODO create file encripted
+            // Create an instance of EncryptedFileStorage
+            val encryptedFileStorage = EncryptedFileStorage(fileDestination)
+
+            // Use EncryptedFileStorage to write the content to the file
+            encryptedFileStorage.write(context, xmlContent)
+
+
+
         } catch (e: Exception) {
             Log.e("FileStorageManager", "Error al crear fileDestination: ${e.message}")
         }
@@ -163,16 +175,32 @@ class FileStorageManager(private val context: Context) {
 
     //endregion
 
-    fun readXmlFromExternalStorageSDCard(filename: String): String {
-        val folderDirectory = folderNamePath(getImageDirectory())
-        val file = File(folderDirectory, filename)
+    fun readXmlFromExternalStorageSDCard(filename: String): String? {
+        try {
+            val folderDirectory = folderNamePath(getImageDirectory())
+            val file = File(folderDirectory, filename)
 
-        return if (file.exists()) {
-            file.readText()
-        } else {
-            Log.e(TAG, "El archivo $filename no existe.")
-            ""
+            if (!file.exists()) {
+                Log.e(TAG, "El archivo $filename no existe.")
+                return ""
+            }
+            //todo read file normal
+//            file.readText()
+
+            //todo read file encripted
+            // Create an instance of EncryptedFileStorage
+            val encryptedFileStorage = EncryptedFileStorage(file)
+            // Use EncryptedFileStorage to read the content from the file
+            return encryptedFileStorage.read(context)
+
+
+
+        }catch (ex: Exception){
+            Log.e(TAG,"error readxml: ${ex.message}")
+            return ""
         }
+        return ""
+
     }
 
     fun readImageBitmapFromSdCard(filename: String): Bitmap? {
