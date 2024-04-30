@@ -43,7 +43,7 @@ class FileStorageManager(private val context: Context) {
     }
 
     private fun getImageDirectory() = IMAGE_DIRECTORY
-    fun folderNamePath(imageDirectory: String) =
+    fun folderNamePath(imageDirectory: String =IMAGE_DIRECTORY) =
         File(Environment.getExternalStorageDirectory().toString() + imageDirectory)
 
 
@@ -141,6 +141,7 @@ class FileStorageManager(private val context: Context) {
 
 
             val fileDestination1 = File(folderDirectory, fileName)
+            Log.i(TAG,"Ubication: ${fileDestination1.absolutePath}")
             if (!fileDestination1.exists()) {
                 val fileCreated = fileDestination1.createNewFile()
                 if (!fileCreated) {

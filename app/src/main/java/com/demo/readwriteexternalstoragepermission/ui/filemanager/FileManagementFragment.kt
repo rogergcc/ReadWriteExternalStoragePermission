@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment
 import com.demo.readwriteexternalstoragepermission.databinding.FragmentFileManagementBinding
 import com.demo.readwriteexternalstoragepermission.ui.utils.FileStorageManager
 import com.demo.readwriteexternalstoragepermission.ui.utils.AppUtils
+import com.demo.readwriteexternalstoragepermission.ui.utils.highlight
+import com.demo.readwriteexternalstoragepermission.ui.utils.toast
 
 
 class FileManagementFragment : Fragment() {
@@ -45,6 +47,7 @@ class FileManagementFragment : Fragment() {
 //            findNavController().navigate(R.id.action_FileManagementFragment_to_SecondFragment)
 //        }
 
+        binding.tvFolderUbication.text="Folder ubication: ${fileStorageManager.folderNamePath().absolutePath} "
         binding.btnCreateFolder.setOnClickListener {
 
             folderName = binding.textEdtFolderName.text.toString().trim()
@@ -72,8 +75,10 @@ class FileManagementFragment : Fragment() {
 
         binding.btnReadXml.setOnClickListener {
             val filename = "xml_" + AppUtils.fileNameXmlSdPublic() + ".xml"
-            val xmlContent = fileStorageManager.readXmlFromExternalStorageSDCard(filename)
+            val xmlContent = fileStorageManager.readXmlFromExternalStorageSDCard(filename).highlight()
             Log.d(TAG, "Contenido del archivo XML: $xmlContent")
+
+            binding.fileText.text = xmlContent
         }
 
         binding.btnReadImage.setOnClickListener {
@@ -97,7 +102,7 @@ class FileManagementFragment : Fragment() {
             val file = fileStorageManager.folderNamePath(folderNameM)
             if (file.exists()) {
                 binding.tvResult.text = "Folder already exists"
-                toast("Folder already exists")
+                requireContext().toast("Folder already exists")
                 return false
             }
             val folderCreated = file.mkdir()
@@ -105,16 +110,16 @@ class FileManagementFragment : Fragment() {
 
             if (!folderCreated) {
                 binding.tvResult.text = "Folder not created"
-                toast("Folder not created")
+                requireContext().toast("Folder not created")
                 return false
             }
             binding.tvResult.text = "Folder created ${file.absolutePath}"
-            toast("Folder created ${file.absolutePath}")
+            requireContext().toast("Folder created ${file.absolutePath}")
             return true
 
         } catch (e: Exception) {
             binding.tvResult.text = "Error: ${e.message}"
-            toast("Error: ${e.message}")
+            requireContext().toast("Error: ${e.message}")
             return false
         }
 
@@ -125,7 +130,7 @@ class FileManagementFragment : Fragment() {
             try {
                 if (bitmap == null) {
                     // La captura de la imagen falló o el usuario canceló la operación
-                    toast("La captura de la imagen falló o el usuario canceló la operación")
+                    requireContext().toast("La captura de la imagen falló o el usuario canceló la operación")
                     Log.i(TAG, "La captura de la imagen falló o el usuario canceló la operación")
                     return@registerForActivityResult
                 }
@@ -137,7 +142,7 @@ class FileManagementFragment : Fragment() {
                 saveImageBitmaptoDirectoriesExternal(bitmap)
             } catch (e: Exception) {
                 Log.e(TAG, "Error: takePicture ${e.message}")
-                toast("Error: takePicture ${e.message}")
+                requireContext().toast("Error: takePicture ${e.message}")
             }
 
         }
@@ -175,39 +180,34 @@ class FileManagementFragment : Fragment() {
 //            fileDestination1.createNewFile()
 
             if (fileDestination1 == null || !fileDestination1.exists()) {
-                binding.tvFile1.text = "file1 No creado : ${fileDestination1?.absolutePath}"
+                binding.tvFile1.text = "SD Publico No creado : ${fileDestination1?.absolutePath}"
             } else {
-                binding.tvFile1.text = "file1 Creado : ${fileDestination1}"
+                binding.tvFile1.text = "SD Publico Creado : ${fileDestination1}"
             }
 
 
             if (fileDestination2 != null) {
                 if (fileDestination2.exists()) {
-                    Log.d(TAG, "saveImage: file2 : $fileDestination2")
-                    binding.tvFile2.text = "file2 Creado : ${fileDestination2}"
+                    binding.tvFile2.text = "SD Privado Creado : ${fileDestination2.path}"
                 } else {
-                    binding.tvFile2.text = "file2 No creado : ${fileDestination2.absolutePath}"
-                    Log.e(TAG, "file2 No creado : ${fileDestination2.absolutePath}")
+                    binding.tvFile2.text = "SD Privado No creado : ${fileDestination2.absolutePath}"
                 }
             } else {
-                binding.tvFile2.text = "file2 No creado : ${fileDestination2?.absolutePath}"
+                binding.tvFile2.text = "SD  Privado No creado : ${fileDestination2?.absolutePath}"
             }
 
 
             return ""
 
-        } catch (e1: Exception) {
-            e1.printStackTrace()
-            Log.d(TAG, "failed saveImageBitmap ${e1.message}")
-            toast("failed ${e1.message}")
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            Log.d(TAG, "failed saveImageBitmap ${ex.message}")
+            requireContext().toast("failed ${ex.message}")
         }
 
         return ""
     }
 
-    private fun toast(message: String) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-    }
 
 
     override fun onDestroyView() {
