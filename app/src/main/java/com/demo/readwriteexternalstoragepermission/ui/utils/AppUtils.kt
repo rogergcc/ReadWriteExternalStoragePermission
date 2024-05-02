@@ -17,16 +17,23 @@ object AppUtils {
         val spannable = SpannableStringBuilder(text)
         val color: Int = ContextCompat.getColor(context, colorId)
         spannable.setSpan(
-            ForegroundColorSpan(color),
-            0,
-            text.length,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            ForegroundColorSpan(color), 0, text.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         return spannable
     }
-    fun getCalendarInstanceName() =
-        Calendar.getInstance().timeInMillis.toString().replace(":", ".")
+
+    fun getCalendarInstanceName() = Calendar.getInstance().timeInMillis.toString().replace(":", ".")
+
     fun fileNameImageSdPublic() = "ImageSdPublic"
     fun fileNameXmlSdPublic() = "XmlSdPublic"
     fun fileNameImageSdPrivate() = "ImageSdPrivate"
+    fun xmlContentSample() = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <note>
+                <to>Tove</to>
+                <from>Jani</from>
+                <heading>Reminder</heading>
+                <body>Don't forget me this weekend!</body>
+            </note>
+        """.trimIndent()
 }

@@ -103,14 +103,13 @@ class FileStorageManager(private val context: Context) {
             if (!folderDirectory.exists()) {
                 val wasDirectoryCreated = folderDirectory.mkdirs()
                 if (!wasDirectoryCreated) {
-                    Log.d(TAG, "Folder directory not created.")
-                    throw Exception("Folder not exists")
+                    throw Exception("Folder directory not created")
                 }
             }
 
-            val fileDestination = File(folderDirectory, filename)
-            if (!fileDestination.exists()) {
-                val fileCreated = fileDestination.createNewFile()
+            val file = File(folderDirectory, filename)
+            if (!file.exists()) {
+                val fileCreated = file.createNewFile()
                 if (!fileCreated) {
                     // Failed to create the file
                     throw Exception("Failed to create the file")
@@ -124,7 +123,7 @@ class FileStorageManager(private val context: Context) {
 
             //TODO create file encripted
             // Create an instance of EncryptedFileStorage
-            val encryptedFileStorage = EncryptedFileStorage(fileDestination)
+            val encryptedFileStorage = EncryptedFileStorage(file)
 
             // Use EncryptedFileStorage to write the content to the file
             encryptedFileStorage.write(context, xmlContent)
@@ -140,17 +139,14 @@ class FileStorageManager(private val context: Context) {
     fun saveImageBitmapToSdCard(myBitmap: Bitmap, fileName: String): File? {
         // sdcard/abc_test
         try {
-
             val folderDirectory = folderNamePath(getImageDirectory())
 
             if (!folderDirectory.exists()) {
                 val wasDirectoryCreated = folderDirectory.mkdirs()
                 if (!wasDirectoryCreated) {
-                    Log.d(TAG, "Folder directory not created.")
-                    throw Exception("Folder not exists")
+                    throw Exception("Folder directory not created")
                 }
             }
-
 
             val fileDestination1 = File(folderDirectory, fileName)
             Log.i(TAG,"Ubication: ${fileDestination1.absolutePath}")
@@ -167,7 +163,7 @@ class FileStorageManager(private val context: Context) {
             return fileDestination1
 
         } catch (e: Exception) {
-            Log.e(TAG, "Error en saveImageBitmapToSdCard(): ${e.message}")
+            Log.e(TAG, "Error en save Image SD(): ${e.message}")
         }
 
         return null
@@ -181,8 +177,8 @@ class FileStorageManager(private val context: Context) {
             val file = File(folderDirectory, filename)
 
             if (!file.exists()) {
-                Log.e(TAG, "El archivo $filename no existe.")
-                return ""
+//                Log.e(TAG, "El archivo $filename no existe.")
+                throw Exception("El archivo $filename no existe.")
             }
             //todo read file normal
 //            file.readText()
@@ -196,22 +192,24 @@ class FileStorageManager(private val context: Context) {
 
 
         }catch (ex: Exception){
-            Log.e(TAG,"error readxml: ${ex.message}")
-            return ""
+//            Log.e(TAG,"error readxml: ${ex.message}")
+            return "read xml error: ${ex.message}"
         }
-        return ""
 
     }
 
     fun readImageBitmapFromSdCard(filename: String): Bitmap? {
-        val folderDirectory = folderNamePath(getImageDirectory())
-        val file = File(folderDirectory, filename)
-
-        return if (file.exists()) {
-            BitmapFactory.decodeFile(file.absolutePath)
-        } else {
-            Log.e(TAG, "El archivo $filename no existe.")
-            null
+        try {
+            val folderDirectory = folderNamePath(getImageDirectory())
+            val file = File(folderDirectory, filename)
+            if (!file.exists()) {
+//                Log.e(TAG, "El archivo $filename no existe.")
+                throw Exception("El archivo $filename no existe.")
+            }
+            return BitmapFactory.decodeFile(file.absolutePath)
+        }catch (ex: Exception){
+            Log.e(TAG,"error read Image: ${ex.message}")
+            return null
         }
     }
 
@@ -219,33 +217,33 @@ class FileStorageManager(private val context: Context) {
     fun saveImageBitmapToSdCardPrivate(myBitmap: Bitmap, fileName: String): File? {
         ///sdcard/Android/data/com.demo.readwriteexternalstoragepermission/files/Pictures/img_1714161561721.jpg
         try {
-            val fileDestination2 =
-                File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName)
+            val file = File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName)
 
-            if (!fileDestination2.exists()) {
-                val fileCreated = fileDestination2.createNewFile()
+            if (!file.exists()) {
+                val fileCreated = file.createNewFile()
                 if (!fileCreated) {
                     // Failed to create the file
                     throw Exception("Failed to create the file")
                 }
-            } else {
-                Log.d(TAG, "saveImageBitmapToSdCardPrivate: file2 exists")
             }
 
-            val fo = FileOutputStream(fileDestination2)
+
+
+            val fo = FileOutputStream(file)
             fo.write(ByteArrayOutputStream().apply {
                 myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, this)
             }.toByteArray())
             MediaScannerConnection.scanFile(
                 context,
-                arrayOf(fileDestination2.path),
+                arrayOf(file.path),
                 arrayOf("image/jpeg"),
                 null
             )
             fo.close()
-            return fileDestination2
+            return file
+
         } catch (e: Exception) {
-            Log.e(TAG, "Error saveImageBitmapToSdCardPrivate(): ${e.message}")
+            Log.e(TAG, "Error save Sd private(): ${e.message}")
         }
         return null
     }

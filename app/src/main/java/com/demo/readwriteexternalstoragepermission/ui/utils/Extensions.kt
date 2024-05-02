@@ -31,9 +31,6 @@ fun AppCompatActivity.hideKeyboard() {
     imm.hideSoftInputFromWindow(findViewById<View>(android.R.id.content).windowToken, 0)
 }
 
-fun Toast.showShortMessage(context: Context, message:String) {
-    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-}
 
 fun Context?.toast(text: CharSequence, duration: Int = Toast.LENGTH_LONG) = this?.let { Toast.makeText(it, text, duration).show() }
 fun Context?.toast(@StringRes textId: Int, duration: Int = Toast.LENGTH_LONG) = this?.let { Toast.makeText(it, textId, duration).show() }

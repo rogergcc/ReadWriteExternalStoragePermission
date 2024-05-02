@@ -13,16 +13,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@color/design_default_color_secondary"
+        android:background="@color/teal_700"
         >
         <TextView
-            style="@style/TextAppearance.AppCompat.Title"
+            style="@style/TextAppearance.AppCompat.Headline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Registrar"
-            android:textColor="@color/black"
+            android:text="@string/title"
             android:layout_gravity="center"
             />
+
+
+        <TextView
+            android:id="@+id/tvFolderUbication"
+            android:layout_marginTop="@dimen/fab_margin"
+            android:text="Folder Ubication:"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <ScrollView
@@ -60,32 +67,34 @@
              -->
             <androidx.appcompat.widget.AppCompatImageView
 
-                android:background="@color/design_default_color_secondary"
+                android:background="@color/teal_700"
                 android:id="@+id/imvPhoto"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:layout_marginTop="10dp"
                 android:adjustViewBounds="true"
                 app:srcCompat="@drawable/ic_picture" />
-            <androidx.appcompat.widget.AppCompatButton
 
-                android:id="@+id/btnSaveSampleXML"
-                android:text="Save  Demo XML"
+            <androidx.cardview.widget.CardView
+                app:cardPreventCornerOverlap="true"
+                app:cardUseCompatPadding="true"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/tvFolderUbication"
-                android:layout_marginTop="@dimen/fab_margin"
-                android:text="Folder Ubication:"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <TextView
-                android:layout_marginTop="@dimen/fab_margin"
-                android:text="Ruta SD Publico"
-                android:id="@+id/tvFile1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_marginTop="@dimen/fab_margin"
+                    android:text="Ruta SD Publico"
+                    android:id="@+id/tvFile1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
             <TextView
                 android:layout_marginTop="@dimen/fab_margin"
                 android:text="Ruta SD Privado"
@@ -94,16 +103,11 @@
                 android:layout_height="wrap_content" />
             <TextView
                 android:layout_marginTop="@dimen/fab_margin"
-                android:text="result"
+                android:text="@string/msg_result_save"
                 android:id="@+id/tvResult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-            <View
-                android:background="@android:drawable/divider_horizontal_bright"
-                android:layout_width="match_parent"
-                android:backgroundTint="@android:color/holo_blue_bright"
-                android:layout_height="20dp"/>
 
 
 
@@ -120,7 +124,6 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginStart="16dp"
                 android:text="@string/raw_image_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"
                 app:layout_constraintStart_toStartOf="parent"
                 />
 
@@ -132,6 +135,17 @@
                 android:layout_marginTop="10dp"
                 android:adjustViewBounds="true"
                 app:srcCompat="@drawable/ic_picture" />
+
+            <View
+                android:layout_marginTop="@dimen/fab_margin"
+                style="@style/Divider.Horizontal"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_marginTop="@dimen/fab_margin"
+                android:id="@+id/btnSaveSampleXML"
+                android:text="Save Demo XML"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
             <androidx.appcompat.widget.AppCompatButton
                 android:layout_marginTop="@dimen/fab_margin"
@@ -146,7 +160,6 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginStart="16dp"
                 android:text="@string/raw_file_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"
                 app:layout_constraintStart_toStartOf="parent"
                  />
 

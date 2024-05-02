@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Divider">
+        <item name="android:background">?android:attr/listDivider</item> //you can give your color here. that will change all divider color in your app.
+    </style>
+
+    <style name="Divider.Horizontal" parent="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">3dp</item>
+
+    </style>
+</resources>

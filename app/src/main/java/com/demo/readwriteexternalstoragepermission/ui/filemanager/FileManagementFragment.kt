@@ -6,13 +6,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.demo.readwriteexternalstoragepermission.databinding.FragmentFileManagementBinding
-import com.demo.readwriteexternalstoragepermission.ui.encrypt.EncryptedFileStorage
-import com.demo.readwriteexternalstoragepermission.ui.utils.FileStorageManager
 import com.demo.readwriteexternalstoragepermission.ui.utils.AppUtils
+import com.demo.readwriteexternalstoragepermission.ui.utils.FileStorageManager
 import com.demo.readwriteexternalstoragepermission.ui.utils.highlight
 import com.demo.readwriteexternalstoragepermission.ui.utils.toast
 
@@ -48,7 +46,7 @@ class FileManagementFragment : Fragment() {
 //            findNavController().navigate(R.id.action_FileManagementFragment_to_SecondFragment)
 //        }
 
-        binding.tvFolderUbication.text="Folder ubication: ${fileStorageManager.folderNamePath().absolutePath} "
+        binding.tvFolderUbication.text="Folder Ubication: ${fileStorageManager.folderNamePath().absolutePath}. \n (Permission Needed) "
         binding.btnCreateFolder.setOnClickListener {
 
             folderName = binding.textEdtFolderName.text.toString().trim()
@@ -60,30 +58,14 @@ class FileManagementFragment : Fragment() {
         }
         binding.btnSaveSampleXML.setOnClickListener {
             val fileName = "xml_" + AppUtils.fileNameXmlSdPublic()
-            Log.d(TAG, "saveXml: init")
-            val xmlContent = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <note>
-                <to>Tove</to>
-                <from>Jani</from>
-                <heading>Reminder</heading>
-                <body>Don't forget me this weekend!</body>
-            </note>
-        """.trimIndent()
+            val xmlContent = AppUtils.xmlContentSample()
 
             fileStorageManager.saveXmlFileToSdCard("$fileName.xml", xmlContent)
-
         }
 
         binding.btnReadXml.setOnClickListener {
             val filename = "xml_" + AppUtils.fileNameXmlSdPublic() + ".xml"
-
-            //todo version anterior leer
             val xmlContent = fileStorageManager.readXmlFromExternalStorageSDCard(filename)?.highlight()
-
-
-
-            Log.d(TAG, "Contenido del archivo XML: $xmlContent")
 
             binding.fileText.text = xmlContent
         }
@@ -91,6 +73,9 @@ class FileManagementFragment : Fragment() {
         binding.btnReadImage.setOnClickListener {
             val filename = "image_" + AppUtils.fileNameImageSdPublic() + ".jpg"
             val bitmap = fileStorageManager.readImageBitmapFromSdCard(filename)
+            if (bitmap==null){
+                requireContext().toast("Archivo de Imagen no existe")
+            }
             binding.imvRead.setImageBitmap(bitmap)
         }
     }
@@ -146,7 +131,7 @@ class FileManagementFragment : Fragment() {
                 binding.imvPhoto.setImageBitmap(bitmap)
 
 
-                saveImageBitmaptoDirectoriesExternal(bitmap)
+                saveImageBitmapDirectoriesExternal(bitmap)
             } catch (e: Exception) {
                 Log.e(TAG, "Error: takePicture ${e.message}")
                 requireContext().toast("Error: takePicture ${e.message}")
@@ -155,15 +140,13 @@ class FileManagementFragment : Fragment() {
         }
 
 
-    private fun saveImageBitmaptoDirectoriesExternal(myBitmap: Bitmap): String {
-
+    private fun saveImageBitmapDirectoriesExternal(myBitmap: Bitmap) {
         try {
 
-
-            val fileName = "image_" + AppUtils.fileNameImageSdPublic()
+            val fileName1 = "image_" + AppUtils.fileNameImageSdPublic()
 
             val fileDestination1 = fileStorageManager.saveImageBitmapToSdCard(
-                myBitmap, "$fileName.jpg"
+                myBitmap, "$fileName1.jpg"
             )
 
             val fileName2 = "img_" + AppUtils.fileNameImageSdPrivate()
@@ -172,16 +155,14 @@ class FileManagementFragment : Fragment() {
                 "$fileName2.jpg"
             )
             /*
-            *
             *  use fileDestination1 ->
             *  /storage/emulated/0/abc_test/1629810839754.jpg
-            *  failed Operation not permitted
+            *  failed Operation not permitted // PERMISSION MANAGE_EXTERNAL_STORAGE NEEDED
             *  show in gallery
             *
             *  use fileDestination2 ->
-            *  /storage/emulated/0/Android/data/master.write_external.storage_practice/files/storage/emulated/0/abc_test/1629810839734.jpg
+            *  /storage/emulated/0/Android/data/com.demo.readwriteexternalstoragepermission/files/Pictures
             *  works fine
-            *
             * */
 
 //            fileDestination1.createNewFile()
@@ -189,30 +170,24 @@ class FileManagementFragment : Fragment() {
             if (fileDestination1 == null || !fileDestination1.exists()) {
                 binding.tvFile1.text = "SD Publico No creado : ${fileDestination1?.absolutePath}"
             } else {
-                binding.tvFile1.text = "SD Publico Creado : ${fileDestination1}"
+                binding.tvFile1.text = "SD Publico Creado : ${fileDestination1.absolutePath}"
             }
 
 
-            if (fileDestination2 != null) {
-                if (fileDestination2.exists()) {
-                    binding.tvFile2.text = "SD Privado Creado : ${fileDestination2.path}"
-                } else {
-                    binding.tvFile2.text = "SD Privado No creado : ${fileDestination2.absolutePath}"
-                }
-            } else {
+            if (fileDestination2 == null || !fileDestination2.exists()) {
                 binding.tvFile2.text = "SD  Privado No creado : ${fileDestination2?.absolutePath}"
+            } else {
+                binding.tvFile2.text = "SD Privado Creado : ${fileDestination2.path}"
             }
 
-
-            return ""
 
         } catch (ex: Exception) {
             ex.printStackTrace()
+            binding.tvResult.text = ex.message
             Log.d(TAG, "failed saveImageBitmap ${ex.message}")
-            requireContext().toast("failed ${ex.message}")
+//            requireContext().toast("failed ${ex.message}")
         }
 
-        return ""
     }
 
 
