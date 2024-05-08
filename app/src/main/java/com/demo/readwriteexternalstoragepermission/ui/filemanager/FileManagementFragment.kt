@@ -72,6 +72,7 @@ class FileManagementFragment : Fragment() {
 
         binding.btnReadImage.setOnClickListener {
             val filename = "image_" + AppUtils.fileNameImageSdPublic() + ".jpg"
+
             val bitmap = fileStorageManager.readImageBitmapFromSdCard(filename)
             if (bitmap==null){
                 requireContext().toast("Archivo de Imagen no existe")
@@ -149,11 +150,11 @@ class FileManagementFragment : Fragment() {
                 myBitmap, "$fileName1.jpg"
             )
 
-            val fileName2 = "img_" + AppUtils.fileNameImageSdPrivate()
-            val fileDestination2 = fileStorageManager.saveImageBitmapToSdCardPrivate(
-                myBitmap,
-                "$fileName2.jpg"
-            )
+//            val fileName2 = "img_" + AppUtils.fileNameImageSdPrivate()
+//            val fileDestination2 = fileStorageManager.saveImageBitmapToSdCardPrivate(
+//                myBitmap,
+//                "$fileName2.jpg"
+//            )
             /*
             *  use fileDestination1 ->
             *  /storage/emulated/0/abc_test/1629810839754.jpg
@@ -173,12 +174,12 @@ class FileManagementFragment : Fragment() {
                 binding.tvFile1.text = "SD Publico Creado : ${fileDestination1.absolutePath}"
             }
 
-
-            if (fileDestination2 == null || !fileDestination2.exists()) {
-                binding.tvFile2.text = "SD  Privado No creado : ${fileDestination2?.absolutePath}"
-            } else {
-                binding.tvFile2.text = "SD Privado Creado : ${fileDestination2.path}"
-            }
+//
+//            if (fileDestination2 == null || !fileDestination2.exists()) {
+//                binding.tvFile2.text = "SD  Privado No creado : ${fileDestination2?.absolutePath}"
+//            } else {
+//                binding.tvFile2.text = "SD Privado Creado : ${fileDestination2.path}"
+//            }
 
 
         } catch (ex: Exception) {
