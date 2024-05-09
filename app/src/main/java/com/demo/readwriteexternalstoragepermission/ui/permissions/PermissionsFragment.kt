@@ -10,9 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.demo.readwriteexternalstoragepermission.R
 import com.demo.readwriteexternalstoragepermission.databinding.FragmentPermissionsBinding
-import com.demo.readwriteexternalstoragepermission.ui.utils.StoragePermissionManager
-import com.demo.readwriteexternalstoragepermission.ui.utils.PermissionRequester
-import com.demo.readwriteexternalstoragepermission.ui.utils.AppUtils
+import com.demo.readwriteexternalstoragepermission.utils.StoragePermissionManager
+import com.demo.readwriteexternalstoragepermission.utils.PermissionRequester
+import com.demo.readwriteexternalstoragepermission.utils.AppUtils
 
 class PermissionsFragment : Fragment() {
 

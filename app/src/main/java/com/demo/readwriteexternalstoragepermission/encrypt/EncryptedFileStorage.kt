@@ -1,4 +1,4 @@
-package com.demo.readwriteexternalstoragepermission.ui.encrypt
+package com.demo.readwriteexternalstoragepermission.encrypt
 
 import android.content.Context
 import android.util.Log

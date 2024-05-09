@@ -1,4 +1,4 @@
-package com.demo.readwriteexternalstoragepermission.ui.utils
+package com.demo.readwriteexternalstoragepermission.utils
 
 import android.app.Activity
 import android.content.Context

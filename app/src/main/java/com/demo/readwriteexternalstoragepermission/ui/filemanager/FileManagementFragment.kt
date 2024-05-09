@@ -9,10 +9,10 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.demo.readwriteexternalstoragepermission.databinding.FragmentFileManagementBinding
-import com.demo.readwriteexternalstoragepermission.ui.utils.AppUtils
-import com.demo.readwriteexternalstoragepermission.ui.utils.FileStorageManager
-import com.demo.readwriteexternalstoragepermission.ui.utils.highlight
-import com.demo.readwriteexternalstoragepermission.ui.utils.toast
+import com.demo.readwriteexternalstoragepermission.utils.AppUtils
+import com.demo.readwriteexternalstoragepermission.utils.files.FileStorageManager
+import com.demo.readwriteexternalstoragepermission.utils.highlight
+import com.demo.readwriteexternalstoragepermission.utils.toast
 
 
 class FileManagementFragment : Fragment() {
@@ -46,7 +46,8 @@ class FileManagementFragment : Fragment() {
 //            findNavController().navigate(R.id.action_FileManagementFragment_to_SecondFragment)
 //        }
 
-        binding.tvFolderUbication.text="Folder Ubication: ${fileStorageManager.folderNamePath().absolutePath}. \n (Permission Needed) "
+        binding.tvFolderUbication.text =
+            "Folder Ubication: ${AppUtils.folderNamePath().absolutePath}. \n (Permission Needed) "
         binding.btnCreateFolder.setOnClickListener {
 
             folderName = binding.textEdtFolderName.text.toString().trim()
@@ -65,18 +66,31 @@ class FileManagementFragment : Fragment() {
 
         binding.btnReadXml.setOnClickListener {
             val filename = "xml_" + AppUtils.fileNameXmlSdPublic() + ".xml"
-            val xmlContent = fileStorageManager.readXmlFromExternalStorageSDCard(filename)?.highlight()
 
-            binding.fileText.text = xmlContent
+            try {
+                val xmlContent = fileStorageManager.readXmlFromExternalStorageSDCard(filename)
+                val contenthighlight = xmlContent?.highlight()
+                binding.fileText.text = contenthighlight
+            } catch (ex: Exception) {
+                requireContext().toast("$ex.message")
+            }
+
+
         }
 
         binding.btnReadImage.setOnClickListener {
             val filename = "image_" + AppUtils.fileNameImageSdPublic() + ".jpg"
-            val bitmap = fileStorageManager.readImageBitmapFromSdCard(filename)
-            if (bitmap==null){
-                requireContext().toast("Archivo de Imagen no existe")
+            try {
+                val bitmap = fileStorageManager.readImageBitmapFromSdCard(filename)
+                if (bitmap == null) {
+                    requireContext().toast("Archivo de Imagen no existe")
+                }
+                binding.imvRead.setImageBitmap(bitmap)
+            } catch (ex: Exception) {
+                requireContext().toast("$ex.message")
             }
-            binding.imvRead.setImageBitmap(bitmap)
+
+
         }
     }
 
@@ -91,7 +105,7 @@ class FileManagementFragment : Fragment() {
 
     private fun createFolder(folderNameM: String): Boolean {
         try {
-            val file = fileStorageManager.folderNamePath(folderNameM)
+            val file = AppUtils.folderNamePath(folderNameM)
             if (file.exists()) {
                 binding.tvResult.text = "Folder already exists"
                 requireContext().toast("Folder already exists")
@@ -118,7 +132,8 @@ class FileManagementFragment : Fragment() {
     }
 
 
-    private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+    private val takePicture =
+        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
             try {
                 if (bitmap == null) {
                     // La captura de la imagen falló o el usuario canceló la operación
@@ -167,18 +182,18 @@ class FileManagementFragment : Fragment() {
 
 //            fileDestination1.createNewFile()
 
-            if (fileDestination1 == null || !fileDestination1.exists()) {
-                binding.tvFile1.text = "SD Publico No creado : ${fileDestination1?.absolutePath}"
-            } else {
-                binding.tvFile1.text = "SD Publico Creado : ${fileDestination1.absolutePath}"
-            }
-
-
-            if (fileDestination2 == null || !fileDestination2.exists()) {
-                binding.tvFile2.text = "SD  Privado No creado : ${fileDestination2?.absolutePath}"
-            } else {
-                binding.tvFile2.text = "SD Privado Creado : ${fileDestination2.path}"
-            }
+//            if (fileDestination1 == null || !fileDestination1.exists()) {
+//                binding.tvFile1.text = "SD Publico No creado : ${fileDestination1?.absolutePath}"
+//            } else {
+//                binding.tvFile1.text = "SD Publico Creado : ${fileDestination1.absolutePath}"
+//            }
+//
+//
+//            if (fileDestination2 == null || !fileDestination2.exists()) {
+//                binding.tvFile2.text = "SD  Privado No creado : ${fileDestination2?.absolutePath}"
+//            } else {
+//                binding.tvFile2.text = "SD Privado Creado : ${fileDestination2.path}"
+//            }
 
 
         } catch (ex: Exception) {
@@ -189,7 +204,6 @@ class FileManagementFragment : Fragment() {
         }
 
     }
-
 
 
     override fun onDestroyView() {
