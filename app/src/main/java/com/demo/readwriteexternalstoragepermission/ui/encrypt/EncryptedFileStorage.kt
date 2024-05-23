@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKey
 import androidx.security.crypto.MasterKeys
+import com.demo.readwriteexternalstoragepermission.ui.utils.LoggerUtils
 import java.io.*
 import java.security.GeneralSecurityException
 
@@ -21,23 +22,29 @@ import java.security.GeneralSecurityException
 class EncryptedFileStorage(private val file: File) {
     private lateinit var encryptedFile: EncryptedFile
     private lateinit var masterKey: MasterKey
-
+    private val base64EncoderDecoder = Base64EncoderDecoder()
+    private val loggerUtils = LoggerUtils()
     private val masterKeyAlias: String = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
-    fun write(context: Context, content: String) {
-        Log.i(TAG, "write: init")
-//        Log.i(TAG, "write: context.filesDir: ${context.filesDir}") ///data/user/0/com.demo.readwriteexternalstoragepermission/files
-
-        if (file.exists()) {
-            file.delete()
-        }
-
-         encryptedFile = EncryptedFile.Builder(
+    private fun initEncryptedFile(context: Context) {
+        encryptedFile = EncryptedFile.Builder(
             file,
             context,
             masterKeyAlias,
             EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
         ).build()
+    }
+    private fun logError(message: String, ex: Exception) {
+        Log.e(TAG, "$message ${ex.message}")
+    }
+
+
+    fun write(context: Context, content: String) {
+        Log.i(TAG, "write: init")
+
+        deleteFileIfExist(file)
+
+        initEncryptedFile(context)
 
         val encryptedOutputStream = encryptedFile.openFileOutput()
         try {
@@ -45,22 +52,17 @@ class EncryptedFileStorage(private val file: File) {
             encryptedOutputStream.flush()
 
         } catch (ignored: Exception) {
-            Log.e(TAG, "write: error ${ignored.message}")
+            loggerUtils.logError(TAG, "write: error", ignored)
         } finally {
             encryptedOutputStream.close()
         }
     }
 
+
     fun read(context: Context): String? {
-        Log.i(TAG, "read(): init")
         if (!file.exists()) return null
-        Log.i(TAG, "read() file: ${file.path}")
-         encryptedFile = EncryptedFile.Builder(
-            file,
-            context,
-            masterKeyAlias,
-            EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-        ).build()
+
+        initEncryptedFile(context)
 
         try {
             val encryptedInputStream = encryptedFile.openFileInput()
@@ -73,21 +75,23 @@ class EncryptedFileStorage(private val file: File) {
             val bytes: ByteArray = byteArrayOutputStream.toByteArray()
             return bytes.decodeToString()
         } catch (e: Exception) {
-            Log.e(TAG, "read: ex ${e.message}" )
+            loggerUtils.logError(TAG, "read: ex", e)
             return null
         }
     }
 
+    //region REGION ENCRYPT AND DECRYPT IMAGE
+
+
     fun encryptImageFile(context: Context, bitmap: Bitmap): File? {
         try {
-//            if (file.exists()) {
-//                file.delete()
-//            }
+            deleteFileIfExist(file)
+
+            initEncryptedFile(context)
 
             // Convierte el bitmap a un array de bytes
             val bitmapBytes = bitmapToByteArray(bitmap)
                 ?: throw Exception("Error at bitmapToByteArray")
-
 
             // Escribe los bytes encriptados en el archivo
             writeByteArray(context, bitmapBytes)
@@ -95,7 +99,7 @@ class EncryptedFileStorage(private val file: File) {
             // Devuelve el archivo encriptado
             return file
         } catch (ex: Exception) {
-            Log.e(TAG, "encryptImageFile() ${ex.message}")
+            loggerUtils.logError(TAG, "encryptImageFile():", ex)
             return null
         }
     }
@@ -103,22 +107,18 @@ class EncryptedFileStorage(private val file: File) {
 
     fun decryptImageFile(context: Context): Bitmap? {
         try {
-            encryptedFile = EncryptedFile.Builder(
-                file,
-                context,
-                masterKeyAlias,
-                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-            ).build()
 
-            // Desencripta los bytes de la imagen
-            val decryptedImageBytes = decryptByteArray(context,encryptedFile)
+            initEncryptedFile(context)
+
+            // Decryp Image's bytes
+            val decryptedImageBytes = decryptByteArray(encryptedFile)
             if (decryptedImageBytes == null || decryptedImageBytes.isEmpty()) {
                 Log.e(TAG, "decryptImageFile() Decrypted image bytes are null or empty")
                 return null
             }
 
             // Añade una comprobación para asegurarte de que los bytes representan una imagen
-            if (!isImage(decryptedImageBytes)) {
+            if (!base64EncoderDecoder.isImage(decryptedImageBytes)) {
                 Log.e(TAG, "decryptImageFile() Decrypted image bytes do not represent a valid image")
                 return null
             }
@@ -131,16 +131,36 @@ class EncryptedFileStorage(private val file: File) {
 
             return bitmap
         } catch (ex: Exception) {
-            Log.e(TAG, "decryptImageFile() ${ex.message}")
+            Log.e(TAG, "decryptImageFile(): ${ex.message}")
             return null
         }
     }
 
+    private fun decryptByteArray(encryptedFile: EncryptedFile): ByteArray? {
+        try {
+            val encryptedInputStream = encryptedFile.openFileInput()
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            var nextByte: Int = encryptedInputStream.read()
+            while (nextByte != -1) {
+                byteArrayOutputStream.write(nextByte)
+                nextByte = encryptedInputStream.read()
+            }
+
+            val base64Decoded = base64EncoderDecoder.decodeFromBase64(byteArrayOutputStream.toByteArray())
+
+            return base64Decoded
+        } catch (e: IOException) {
+            Log.e(TAG, "decryptByteArray: ex ${e.message}" )
+            return null
+        }
+    }
+
+    //endregion
+
     @Throws(GeneralSecurityException::class, IOException::class)
     fun encrypt(context: Context, target: File, bitmap: Bitmap) {
-        if (file.exists()) {
-            file.delete()
-        }
+        deleteFileIfExist(file)
+
         val mainKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
@@ -193,14 +213,6 @@ class EncryptedFileStorage(private val file: File) {
 
 
 
-    // Función para comprobar si los bytes representan una imagen
-    private fun isImage(bytes: ByteArray): Boolean {
-        val options = BitmapFactory.Options()
-        options.inJustDecodeBounds = true
-        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
-        return options.outWidth > 0 && options.outHeight > 0
-    }
-
     @Throws(GeneralSecurityException::class, IOException::class)
     fun encryptToFile(context: Context, contents: ByteArray?) {
         val encryptedFile = EncryptedFile.Builder(
@@ -209,6 +221,7 @@ class EncryptedFileStorage(private val file: File) {
             masterKeyAlias,
             EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
         ).build()
+
         val outputStream: OutputStream = encryptedFile.openFileOutput()
         outputStream.write(contents)
         outputStream.flush()
@@ -216,15 +229,8 @@ class EncryptedFileStorage(private val file: File) {
     }
 
     private fun writeByteArray(context: Context, content: ByteArray) {
-        if (file.exists()) {
-            file.delete()
-        }
-        encryptedFile = EncryptedFile.Builder(
-            file,
-            context,
-            masterKeyAlias,
-            EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-        ).build()
+
+
 
         val encryptedOutputStream = encryptedFile.openFileOutput()
         try {
@@ -240,7 +246,7 @@ class EncryptedFileStorage(private val file: File) {
 
 
     @Throws(GeneralSecurityException::class, IOException::class)
-    fun decryptFile(context: Context, target: File): ByteArray? {
+    fun decryptFile(context: Context): ByteArray? {
 
         val mainKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -284,28 +290,9 @@ class EncryptedFileStorage(private val file: File) {
             encryptedOutputStream.close()
         }
 
-//        val outputStream: OutputStream = encryptedFile.openFileOutput()
-//        outputStream.write(contents)
-//        outputStream.flush()
-//        outputStream.close()
     }
 
-    private fun decryptByteArray(context: Context, encryptedFile: EncryptedFile): ByteArray? {
-        try {
-            val encryptedInputStream = encryptedFile.openFileInput()
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            var nextByte: Int = encryptedInputStream.read()
-            while (nextByte != -1) {
-                byteArrayOutputStream.write(nextByte)
-                nextByte = encryptedInputStream.read()
-            }
-            val base64Decoded = Base64.decode(byteArrayOutputStream.toByteArray(), Base64.DEFAULT)
-            return base64Decoded
-        } catch (e: IOException) {
-            Log.e(TAG, "decryptByteArray: ex ${e.message}" )
-            return null
-        }
-    }
+
 
     fun readByteArray(context: Context, inputImageFile: File): ByteArray? {
         Log.i(TAG, "readByteArray(): init")
@@ -331,24 +318,22 @@ class EncryptedFileStorage(private val file: File) {
              return null
          }
     }
-    fun byteArrayToBitmap(bytes: ByteArray?): Bitmap? {
+    fun byteArrayToBitmap(bytes: ByteArray): Bitmap? {
         try {
-            val data = Base64.decode(bytes, Base64.DEFAULT)
+            val data = base64EncoderDecoder.decodeFromBase64(bytes)
             val bitmapDecode= BitmapFactory.decodeByteArray(data, 0, data.size)
-            if (bitmapDecode==null){
-                throw Exception("Error at decode")
-            }
+                ?: throw Exception("Error at decode")
             return bitmapDecode
         }catch (ex:Exception){
             Log.e(TAG, "byteArrayToBitmap: ${ex.message}" )
             return null
         }
     }
-    fun encryptByteArray(context: Context, bitmapBytes: ByteArray): ByteArray? {
+    fun encryptByteArray(bitmapBytes: ByteArray): ByteArray? {
         try {
             // Convierte el bitmap a un array de bytes
-            val base64Encoded = Base64.encodeToString(bitmapBytes, Base64.DEFAULT)
-            return base64Encoded.toByteArray()
+            val base64Encoded = base64EncoderDecoder.encodeToBase64(bitmapBytes)
+            return base64Encoded
         } catch (ex: Exception) {
             Log.e(TAG, "encryptByteArray() ${ex.message}")
             return null
