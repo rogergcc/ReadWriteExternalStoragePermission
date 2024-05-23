@@ -3,15 +3,12 @@ package com.demo.readwriteexternalstoragepermission.ui.encrypt
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.security.crypto.EncryptedFile
-import androidx.security.crypto.MasterKey
 import androidx.security.crypto.MasterKeys
 import com.demo.readwriteexternalstoragepermission.ui.utils.LoggerUtils
 import java.io.*
-import java.security.GeneralSecurityException
 
 
 /**
@@ -21,7 +18,6 @@ import java.security.GeneralSecurityException
 //thanks to https://github.com/BRZ-GmbH/CovidCertificate-App-Android
 class EncryptedFileStorage(private val file: File) {
     private lateinit var encryptedFile: EncryptedFile
-    private lateinit var masterKey: MasterKey
     private val base64EncoderDecoder = Base64EncoderDecoder()
     private val loggerUtils = LoggerUtils()
     private val masterKeyAlias: String = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
@@ -34,7 +30,7 @@ class EncryptedFileStorage(private val file: File) {
             EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
         ).build()
     }
-    fun write(context: Context, content: String) {
+    fun writeEncryptedData(context: Context, content: String) {
         Log.i(TAG, "write: init")
 
         deleteFileIfExist(file)
@@ -46,15 +42,15 @@ class EncryptedFileStorage(private val file: File) {
             encryptedOutputStream.write(content.encodeToByteArray())
             encryptedOutputStream.flush()
 
-        } catch (ignored: Exception) {
-            loggerUtils.logError(TAG, "write: error", ignored)
+        } catch (ex: Exception) {
+            loggerUtils.logError(TAG, "writeEncryptedData(): ex ${ex.message}")
         } finally {
             encryptedOutputStream.close()
         }
     }
 
 
-    fun read(context: Context): String? {
+    fun readEncryptedData(context: Context): String? {
         if (!file.exists()) return null
 
         initEncryptedFile(context)
@@ -70,7 +66,7 @@ class EncryptedFileStorage(private val file: File) {
             val bytes: ByteArray = byteArrayOutputStream.toByteArray()
             return bytes.decodeToString()
         } catch (e: Exception) {
-            loggerUtils.logError(TAG, "read: ex", e)
+            loggerUtils.logError(TAG, "readEncryptedData(): ex ${e.message} ")
             return null
         }
     }
@@ -89,12 +85,12 @@ class EncryptedFileStorage(private val file: File) {
                 ?: throw Exception("Error at bitmapToByteArray")
 
             // Escribe los bytes encriptados en el archivo
-            writeByteArray(context, bitmapBytes)
+            writeByteArray(bitmapBytes)
 
             // Devuelve el archivo encriptado
             return file
         } catch (ex: Exception) {
-            loggerUtils.logError(TAG, "encryptImageFile():", ex)
+            loggerUtils.logError(TAG, "encryptImageFile(): ex ${ex.message}")
             return null
         }
     }
@@ -131,7 +127,7 @@ class EncryptedFileStorage(private val file: File) {
         }
     }
 
-    private fun writeByteArray(context: Context, content: ByteArray) {
+    private fun writeByteArray(content: ByteArray) {
 
 
 
@@ -140,7 +136,8 @@ class EncryptedFileStorage(private val file: File) {
             encryptedOutputStream.write(content)
             encryptedOutputStream.flush()
         } catch (ex: IOException) {
-            Log.e(TAG, "writeByteArray: error: ${ex.message}")
+            loggerUtils.logError(TAG, "writeByteArray(): ex ${ex.message}")
+
         } finally {
             encryptedOutputStream.close()
         }
@@ -160,7 +157,7 @@ class EncryptedFileStorage(private val file: File) {
 
             return base64Encoded.toByteArray()
         }catch (ex:Exception){
-            Log.e(TAG, "bitmapToByteArray: ${ex.message}" )
+            loggerUtils.logError(TAG, "bitmapToByteArray(): ex ${ex.message}")
             return null
         }
 
@@ -188,7 +185,7 @@ class EncryptedFileStorage(private val file: File) {
 
             return base64Decoded
         } catch (e: IOException) {
-            Log.e(TAG, "decryptByteArray: ex ${e.message}" )
+            loggerUtils.logError(TAG, "decryptByteArray(): ex ${e.message}")
             return null
         }
     }

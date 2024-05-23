@@ -8,7 +8,7 @@ import android.util.Log
  * year 2024 .
  */
 class LoggerUtils {
-    fun logError(tag: String, message: String, ex: Exception) {
-        Log.e(tag, "$message ${ex.message}")
+    fun logError(tag: String, message: String) {
+        Log.e(tag, message)
     }
 }

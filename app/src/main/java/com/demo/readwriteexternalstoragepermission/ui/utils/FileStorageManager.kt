@@ -8,17 +8,13 @@ package com.demo.readwriteexternalstoragepermission.ui.utils
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.MediaScannerConnection
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import androidx.security.crypto.EncryptedFile
-import androidx.security.crypto.MasterKeys
 import com.demo.readwriteexternalstoragepermission.ui.encrypt.EncryptedFileStorage
 import java.io.*
-import java.security.GeneralSecurityException
 
 class FileStorageManager(private val context: Context) {
     companion object {
@@ -125,7 +121,7 @@ class FileStorageManager(private val context: Context) {
             val encryptedFileStorage = EncryptedFileStorage(file)
 
             // Use EncryptedFileStorage to write the content to the file
-            encryptedFileStorage.write(context, xmlContent)
+            encryptedFileStorage.writeEncryptedData(context, xmlContent)
 
 
         } catch (e: Exception) {
@@ -156,10 +152,6 @@ class FileStorageManager(private val context: Context) {
                 }
             }
 
-//            val fo = FileOutputStream(fileDestination1)
-//            myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, fo)
-//            fo.close()
-//            return fileDestination1
 
             val encryptedFileStorage = EncryptedFileStorage(fileDestination1)
 
@@ -187,7 +179,6 @@ class FileStorageManager(private val context: Context) {
 //                Log.e(TAG, "El archivo $filename no existe.")
                 throw Exception("El archivo $filename no existe.")
             }
-//            return BitmapFactory.decodeFile(file.absolutePath)
 
 
             val encryptedFileStorage = EncryptedFileStorage(encryptedImageFile)
@@ -211,13 +202,12 @@ class FileStorageManager(private val context: Context) {
 //                Log.e(TAG, "El archivo $filename no existe.")
                 throw Exception("El archivo $filename no existe.")
             }
-//            return file.readText()
 
             //todo read file encripted
             // Create an instance of EncryptedFileStorage
             val encryptedFileStorage = EncryptedFileStorage(file)
             // Use EncryptedFileStorage to read the content from the file
-            return encryptedFileStorage.read(context)
+            return encryptedFileStorage.readEncryptedData(context)
 
         } catch (ex: Exception) {
 //            Log.e(TAG,"error readxml: ${ex.message}")
