@@ -136,6 +136,49 @@ class EncryptedFileStorage(private val file: File) {
         }
     }
 
+    private fun writeByteArray(context: Context, content: ByteArray) {
+
+
+
+        val encryptedOutputStream = encryptedFile.openFileOutput()
+        try {
+            encryptedOutputStream.write(content)
+            encryptedOutputStream.flush()
+        } catch (ex: IOException) {
+            Log.e(TAG, "writeByteArray: error: ${ex.message}")
+        } finally {
+            encryptedOutputStream.close()
+        }
+    }
+
+
+
+
+
+    private fun bitmapToByteArray(bitmap: Bitmap): ByteArray? {
+        try {
+            val stream = ByteArrayOutputStream()
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val base64Encoded = Base64.encodeToString(stream.toByteArray(), Base64.DEFAULT)
+                ?: throw Exception("Error at encodeToString")
+
+            return base64Encoded.toByteArray()
+        }catch (ex:Exception){
+            Log.e(TAG, "bitmapToByteArray: ${ex.message}" )
+            return null
+        }
+
+    }
+
+
+    private fun deleteFileIfExist(file: File) {
+
+        if (file.exists()) {
+            file.delete()
+        }
+    }
+
     private fun decryptByteArray(encryptedFile: EncryptedFile): ByteArray? {
         try {
             val encryptedInputStream = encryptedFile.openFileInput()
@@ -227,22 +270,6 @@ class EncryptedFileStorage(private val file: File) {
         outputStream.flush()
         outputStream.close()
     }
-
-    private fun writeByteArray(context: Context, content: ByteArray) {
-
-
-
-        val encryptedOutputStream = encryptedFile.openFileOutput()
-        try {
-            encryptedOutputStream.write(content)
-            encryptedOutputStream.flush()
-        } catch (ex: IOException) {
-            Log.e(TAG, "writeByteArray: error: ${ex.message}")
-        } finally {
-            encryptedOutputStream.close()
-        }
-    }
-
 
 
     @Throws(GeneralSecurityException::class, IOException::class)
@@ -339,29 +366,8 @@ class EncryptedFileStorage(private val file: File) {
             return null
         }
     }
-    private fun bitmapToByteArray(bitmap: Bitmap): ByteArray? {
-        try {
-            val stream = ByteArrayOutputStream()
-//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            val base64Encoded = Base64.encodeToString(stream.toByteArray(), Base64.DEFAULT)
-                ?: throw Exception("Error at encodeToString")
-
-            return base64Encoded.toByteArray()
-        }catch (ex:Exception){
-            Log.e(TAG, "bitmapToByteArray: ${ex.message}" )
-            return null
-        }
-
-    }
 
 
-    private fun deleteFileIfExist(file: File) {
-
-        if (file.exists()) {
-            file.delete()
-        }
-    }
 
     fun saveEncryptedImage(context: Context,imageUri: Uri) {
 //        deleteFileIfExist(file)
