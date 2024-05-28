@@ -58,6 +58,9 @@ class PermissionsFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val titleFragment = "${resources.getString(R.string.title)} \n${resources.getString(R.string.app_permission)}"
+        binding.tvTitle.text = titleFragment
         cameraPermissionRequester.registerRequestPermissionLauncher(requireActivity().activityResultRegistry)
 //        writeStoragePermissionRequester.registerRequestPermissionLauncher(requireActivity().activityResultRegistry)
 //        readStoragePermissionRequester.registerRequestPermissionLauncher(requireActivity().activityResultRegistry)

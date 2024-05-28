@@ -18,8 +18,23 @@ android {
     }
 
     buildTypes {
+        debug {
+            debuggable true
+            versionNameSuffix "-STORAGE.D"
+            applicationIdSuffix ".storage.debug"
+            resValue "string", "app_name_build", "StorageSD-Debug"
+            resValue "string", "app_permission", "MANAGE_EXTERNAL_STORAGE"
+
+            //resValue("string", "google_maps_key", localProperties['google_maps_key_debug'])
+        }
+
         release {
-            minifyEnabled false
+            applicationIdSuffix ""
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            resValue "string", "app_name_build", "StorageSD"
+            resValue "string", "app_permission", "MANAGE_EXTERNAL_STORAGE"
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
